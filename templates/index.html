@@ -10,30 +10,36 @@
 
     <form id="translateForm">
       <label>Enter Text or Use Voice:</label><br />
-      <textarea name="input_text" id="inputText" rows="4" cols="50"></textarea  
+      <textarea name="input_text" id="inputText" rows="4" cols="50"></textarea
       ><br /><br />
 
       <button type="button" id="startBtn">Start Recording</button>
       <button type="button" id="stopBtn" disabled>Stop Recording</button>
-      <h3>📝 Transcribed Text:</h3>
-<div id="transcribedText" style="border: 1px solid #ccc; padding: 5px;"></div>
+      <button type="submit">Translate</button>
+      <!-- <h3>📝 Transcribed Text:</h3> -->
+      <!-- <div
+        id="transcribedText"
+        style="border: 1px solid #ccc; padding: 5px"
+      ></div> -->
 
-<h3>🌍 Detected Dialect:</h3>
-<div id="dialect" style="border: 1px solid #ccc; padding: 5px;"></div>
+      <h3>🌍 Detected Dialect:</h3>
+      <div id="dialect" style="border: 1px solid #ccc; padding: 5px"></div>
 
-<h3>🗣️ Standard Telugu:</h3>
-<div id="standardTelugu" style="border: 1px solid #ccc; padding: 5px;"></div>
+      <!-- <h3>🗣️ Standard Telugu:</h3> -->
+      <!-- <div
+        id="standardTelugu"
+        style="border: 1px solid #ccc; padding: 5px"
+      ></div> -->
 
-<h3>🧠 English Translation:</h3>
-<div id="outputText" style="border: 1px solid #ccc; padding: 5px;"></div>
-
+      <h3>🧠 English Translation:</h3>
+      <div id="outputText" style="border: 1px solid #ccc; padding: 5px"></div>
 
       <br /><br />
-      <button type="submit">Translate</button>
+      
     </form>
 
-    <h3>Detected Dialect: <span id="dialect"></span></h3>
-    <h3>Translated English: <span id="outputText"></span></h3>
+    <!-- <h3>Detected Dialect: <span id="dialect"></span></h3>
+    <h3>Translated English: <span id="outputText"></span></h3> -->
 
     <script>
       let mediaRecorder;
@@ -54,38 +60,41 @@
             audioChunks.push(event.data);
           };
 
-        mediaRecorder.onstop = async () => {
-    console.log("Stopped recording, preparing to send...");
-    const blob = new Blob(audioChunks, { type: 'audio/wav' });
-    const formData = new FormData();
-    formData.append('audio_data', blob, 'recording.wav');  // ✅ correct!
+          mediaRecorder.onstop = async () => {
+            console.log("Stopped recording, preparing to send...");
+            const blob = new Blob(audioChunks, { type: "audio/wav" });
+            const formData = new FormData();
+            formData.append("audio_data", blob, "recording.wav"); // ✅ correct!
 
+            try {
+              const response = await fetch("/process_audio", {
+                method: "POST",
+                body: formData,
+              });
 
-    try {
-        const response = await fetch('/process_audio', {
-            method: 'POST',
-            body: formData
-        });
+              if (!response.ok) {
+                throw new Error("Server error: " + response.status);
+              }
 
-        if (!response.ok) {
-            throw new Error("Server error: " + response.status);
-        }
+              const result = await response.json();
+              console.log("🎉 Full response:", result);
 
-        const result = await response.json();
-        console.log("🎉 Full response:", result);
-
-        // Show outputs in corresponding divs
-        document.getElementById("inputText").value = result.transcribed_text || "";
-        document.getElementById("transcribedText").innerText = result.transcribed_text || "N/A";
-        document.getElementById("dialect").innerText = result.dialect || "Unknown";
-        document.getElementById("standardTelugu").innerText = result.standard_telugu || "N/A";
-        document.getElementById("outputText").innerText = result.english_translation || "N/A";
-
-    } catch (err) {
-        console.error("Error sending audio:", err);
-        alert("❌ Failed to process audio. Please try again.");
-    }
-};
+              // Show outputs in corresponding divs
+              document.getElementById("inputText").value =
+                result.transcribed_text || "";
+              document.getElementById("transcribedText").innerText =
+                result.transcribed_text || "N/A";
+              document.getElementById("dialect").innerText =
+                result.dialect || "Unknown";
+              document.getElementById("standardTelugu").innerText =
+                result.standard_telugu || "N/A";
+              document.getElementById("outputText").innerText =
+                result.english_translation || "N/A";
+            } catch (err) {
+              console.error("Error sending audio:", err);
+              alert("❌ Failed to process audio. Please try again.");
+            }
+          };
 
           mediaRecorder.start();
           console.log("Recording started...");
