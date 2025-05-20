@@ -1,8 +1,12 @@
 import whisper
 
-def transcribe_audio(file_path):
-    print("📥 Received file:", file_path)
-    model = whisper.load_model("base")  # or "tiny" if slow
-    result = model.transcribe(file_path)
-    print("📄 Transcribed text:", result["text"])
-    return result["text"]
+model = whisper.load_model("medium")  # medium or large for better accuracy
+
+def transcribe_audio(audio_path):
+    try:
+        # language="te" hints the model to expect Telugu (if supported)
+        result = model.transcribe(audio_path, language="te")
+        return result["text"]
+    except Exception as e:
+        print(f"Transcription error: {e}")
+        return ""

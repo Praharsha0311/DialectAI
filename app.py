@@ -1,28 +1,34 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session, redirect
 from flask_cors import CORS
 import os
+import traceback
+import mysql.connector
+
+# Custom modules
 from whisper_module import transcribe_audio
 from dialect_mapper import detect_dialect_and_translate
 from translate_module import translate_to_english
 from users_db import init_user_db
-import subprocess
-import traceback
-
-from flask import Flask, render_template, request, redirect, session, jsonify
-import mysql.connector
-from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "PPS"
+CORS(app)
 
-# Database connection
+# Initialize DB table (only once)
+try:
+    init_user_db()
+except Exception as e:
+    print("⚠️ Skipping DB init (maybe table exists):", e)
+
+# Connect to MySQL
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="",  # Use your MySQL password here if set
+    password="",
     database="users_db"
 )
-cursor = db.cursor(dictionary=True)
+
+# ---------------- AUTH ROUTES ----------------
 
 @app.route('/')
 def home():
@@ -33,7 +39,7 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         email = request.form['email']
-        password = generate_password_hash(request.form['password'])
+        password = request.form['password']  # ❗ Plaintext as requested
 
         cur = db.cursor()
         cur.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
@@ -44,7 +50,6 @@ def register():
         return redirect('/login')
     return render_template('register.html')
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -52,22 +57,17 @@ def login():
         password = request.form['password']
 
         cur = db.cursor(dictionary=True)
-        try:
-            cur.execute("SELECT * FROM users WHERE email = %s", (email,))
-            user = cur.fetchone()  # ✅ MUST read the result before closing cursor
+        cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cur.fetchone()
+        cur.close()
 
-        finally:
-            cur.close()  # ✅ Now it's safe to close
-
-        if user and check_password_hash(user['password'], password):
+        if user and user['password'] == password:
             session['username'] = user['username']
             return redirect('/index')
         else:
-            return render_template('login.html', error="Invalid credentials")
+            return render_template('login.html', error="Invalid email or password")
 
     return render_template('login.html')
-
-
 
 @app.route('/index')
 def index():
@@ -80,35 +80,52 @@ def logout():
     session.clear()
     return redirect('/')
 
-# Add your other routes (e.g., /translate, /process_audio) below...
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-app = Flask(__name__)
-CORS(app)
-
-# Initialize MySQL user DB (create table if not exists)
-init_user_db()
-
-@app.route('/')
-def index():
-    return render_template('index.html')
+# ---------------- TRANSLATION ROUTES ----------------
 
 @app.route('/record_audio', methods=['POST'])
 def record_audio():
-    # You would normally record via frontend mic. For now, we use a sample audio
-    audio_file = "sample_audio.wav"  # Later replace with real audio capture
+    audio_file = "sample_audio.wav"
     text = transcribe_audio(audio_file)
     return jsonify({'transcribed_text': text})
+
+# @app.route('/translate', methods=['POST'])
+# def translate():
+#     data = request.get_json()
+#     input_text = data.get("input_text", "").strip()
+
+#     if not input_text:
+#         return jsonify({'error': 'Empty input text'}), 400
+
+#     print("📥 Received text for translation:", input_text)
+
+#     try:
+#         standard_telugu, detected_dialect = detect_dialect_and_translate(input_text)
+#         english_translation = translate_to_english(standard_telugu)
+
+#         print("🔍 Dialect:", detected_dialect)
+#         print("🧾 Standard Telugu:", standard_telugu)
+#         print("🌍 English Translation:", english_translation)
+
+#         return jsonify({
+#             'dialect': detected_dialect,
+#             'standard_telugu': standard_telugu,
+#             'english_translation': english_translation
+#         })
+#     except Exception as e:
+#         traceback.print_exc()
+#         return jsonify({'error': 'Translation failed'}), 500
 
 @app.route('/translate', methods=['POST'])
 def translate():
     data = request.get_json()
     dialect_text = data.get("input_text", "")
+    print(f"Received: {dialect_text}")
 
     standard_telugu, detected_dialect = detect_dialect_and_translate(dialect_text)
+    print(f"Standard Telugu: {standard_telugu}, Dialect: {detected_dialect}")
+
     english_translation = translate_to_english(standard_telugu)
+    print(f"English: {english_translation}")
 
     return jsonify({
         'dialect': detected_dialect,
@@ -116,37 +133,38 @@ def translate():
         'english_translation': english_translation
     })
 
-import traceback  # Make sure this is at the top of app.py
 
 @app.route('/process_audio', methods=['POST'])
 def process_audio():
-    print("🔵 /process_audio endpoint hit")
-
     if 'audio_data' not in request.files:
-        print("❌ No audio_data in request.files")
         return jsonify({'error': 'No audio file uploaded'}), 400
 
     audio = request.files['audio_data']
     file_path = os.path.join("uploads", "recorded.wav")
 
     try:
-        # Ensure uploads folder exists
         os.makedirs("uploads", exist_ok=True)
         audio.save(file_path)
-        print("✅ Audio saved at:", file_path)
+        
+        # Check if file has data
+        file_size = os.path.getsize(file_path)
+        print(f"✅ Saved file: {file_path} ({file_size} bytes)")
 
-        # Transcribe using Whisper
-        print("🔁 Starting transcription...")
+        if file_size < 5000:  # Less than 5 KB likely means silence
+            return jsonify({'error': 'Audio too short or empty'}), 400
+
         text = transcribe_audio(file_path)
-        print("✅ Transcription result:", text)
+        print(f"✅ Transcribed Text: {text}")
 
         return jsonify({'transcribed_text': text})
 
     except Exception as e:
-        print("❌ Whisper transcription failed")
-        traceback.print_exc()  # Shows detailed error
-        return jsonify({'error': 'Transcription failed'}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Transcription failed: {str(e)}'}), 500
 
+
+# ---------------- MAIN ----------------
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -43,7 +43,7 @@
     <!-- <h3>Detected Dialect: <span id="dialect"></span></h3>
     <h3>Translated English: <span id="outputText"></span></h3> -->
 
-    <script>
+    <!-- <script>
       let mediaRecorder;
       let audioChunks = [];
 
@@ -128,6 +128,63 @@
           document.getElementById("outputText").innerText =
             result.english_translation;
         });
-    </script>
+    </script> -->
+    <script src="/static/recorder.js"></script>
+    <script>
+  let recorder, gumStream;
+
+  document.getElementById("startBtn").onclick = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      gumStream = stream;
+
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const input = audioContext.createMediaStreamSource(stream);
+
+      recorder = new Recorder(input, { numChannels: 1 });
+      recorder.record();
+
+      console.log("🎙️ Recording started...");
+      document.getElementById("startBtn").disabled = true;
+      document.getElementById("stopBtn").disabled = false;
+    } catch (err) {
+      console.error("Microphone error:", err);
+    }
+  };
+
+  document.getElementById("stopBtn").onclick = () => {
+    recorder.stop();
+    gumStream.getAudioTracks()[0].stop();
+    console.log("🛑 Recording stopped");
+
+    recorder.exportWAV(async (blob) => {
+      const formData = new FormData();
+      formData.append("audio_data", blob, "recording.wav");
+
+      try {
+        const response = await fetch("/process_audio", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await response.json();
+        console.log("🎉 Full response:", result);
+
+        document.getElementById("inputText").value = result.transcribed_text || "";
+        document.getElementById("dialect").innerText = result.dialect || "Unknown";
+        document.getElementById("outputText").innerText = result.english_translation || "N/A";
+      } catch (err) {
+        console.error("Error sending audio:", err);
+        alert("❌ Failed to process audio. Please try again.");
+      }
+    });
+
+    document.getElementById("startBtn").disabled = false;
+    document.getElementById("stopBtn").disabled = true;
+  };
+</script>
+
+
+
   </body>
 </html>
