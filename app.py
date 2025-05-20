@@ -8,6 +8,83 @@ from users_db import init_user_db
 import subprocess
 import traceback
 
+from flask import Flask, render_template, request, redirect, session, jsonify
+import mysql.connector
+from werkzeug.security import generate_password_hash, check_password_hash
+
+app = Flask(__name__)
+app.secret_key = "PPS"
+
+# Database connection
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="",  # Use your MySQL password here if set
+    database="users_db"
+)
+cursor = db.cursor(dictionary=True)
+
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = generate_password_hash(request.form['password'])
+
+        cur = db.cursor()
+        cur.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
+                    (username, email, password))
+        db.commit()
+        cur.close()
+
+        return redirect('/login')
+    return render_template('register.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        cur = db.cursor(dictionary=True)
+        try:
+            cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+            user = cur.fetchone()  # ✅ MUST read the result before closing cursor
+
+        finally:
+            cur.close()  # ✅ Now it's safe to close
+
+        if user and check_password_hash(user['password'], password):
+            session['username'] = user['username']
+            return redirect('/index')
+        else:
+            return render_template('login.html', error="Invalid credentials")
+
+    return render_template('login.html')
+
+
+
+@app.route('/index')
+def index():
+    if 'username' not in session:
+        return redirect('/login')
+    return render_template('index.html', username=session['username'])
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/')
+
+# Add your other routes (e.g., /translate, /process_audio) below...
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
 app = Flask(__name__)
 CORS(app)
 

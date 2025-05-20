@@ -11,11 +11,13 @@ def init_user_db():
     cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
     conn.database = DB_NAME
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            username VARCHAR(100),
-            email VARCHAR(100),
-            password VARCHAR(100)
+        CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    password VARCHAR(100)
+);
+
         )
     """)
     conn.commit()
