@@ -27,10 +27,10 @@ DialectAI is a web-based translator that converts Telugu dialect text or speech 
 ---
 
 ## 📦 Installation Guide
-
+```bash
 ### 1️⃣ Clone the Repository
 
-```bash
+
 git clone https://github.com/Praharsha0311/DialectAI.git
 cd DialectAI
 
@@ -64,4 +64,5 @@ Make sure dialect_model.pkl is trained and saved using the two CSV files.
 python app.py
 Then open in your browser:
 http://127.0.0.1:5000/
+
 
