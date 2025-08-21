@@ -1,0 +1,34 @@
+/* styles.css */
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    text-align: center;
+    padding: 40px;
+    padding-top:120px;
+}
+.container {
+    background: white;
+    padding: 30px;
+    margin: auto;
+    width: 50%;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    /* padding-top:120px; */
+}
+input, button {
+    padding: 10px;
+    margin: 10px;
+    width: 80%;
+    border-radius: 6px;
+}
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+}
+.result {
+    margin-top: 20px;
+    padding: 15px;
+    background: #e0f7fa;
+    border-radius: 8px;
+}

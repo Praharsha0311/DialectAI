@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Translation History</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background-color: #f5f5f5;
+      }
+      h2 {
+        color: #333;
+      }
+      table {
+        border-collapse: collapse;
+        width: 80%;
+        background-color: white;
+        margin:0 auto;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #007bff;
+        color: white;
+      }
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+    </style>
+  </head>
+  <body>
+        {% include 'navbar.html' %}
+
+    {% if username %}
+    <h3 style="text-align: center;">Hi, {{ username }}👋</h3>
+    {% endif %}
+    <h2 style="text-align: center;">Your Translation History</h2>
+    {% if translations %}
+    <table>
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Input Type</th>
+          <th>Input Text</th>
+          <th>Translated Output</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in translations %}
+        <tr>
+          <td>{{ row.translated_at }}</td>
+          <td>{{ row.input_type }}</td>
+          <td>{{ row.input_text }}</td>
+          <td>{{ row.output_text }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>No translation history found.</p>
+    {% endif %}
+
+    <div class="container">
+      <a
+        href="{{ url_for('index') }}"
+        class="back-button"
+        style="text-decoration: none"
+        >⬅ Back to DialectAI</a
+      >
+  </body>
+</html>

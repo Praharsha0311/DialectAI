@@ -1,0 +1,72 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  background-color: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  text-align: center;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* static/home.css or static/styles.css */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1em 2em;
+  background-color: white;
+  color: Black;
+  border-radius: 10px;
+}
+
+.navbar h1 a {
+  text-decoration: none;
+  color: black;
+}
+
+.navbar nav a {
+  margin-left: 1.5em;
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+}
+
+.navbar nav a:hover {
+  color: #004080;
+}

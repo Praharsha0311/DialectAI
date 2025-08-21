@@ -1,0 +1,76 @@
+<!-- templates/navbar.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DialectAI</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: white;
+      }
+      header {
+        margin: 0;
+        padding: 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .navbar {
+        background-color: white;
+        border-radius: 0;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .navbar h1 a {
+        text-decoration: none;
+        color: black;
+        font-size: 2rem;
+        font-weight: bold;
+        font-family: sans-serif;
+      }
+      .navbar nav {
+        display: flex;
+        gap: 30px;
+      }
+      .navbar nav a {
+        text-decoration: none;
+        color: black;
+        font-weight: bold;
+        font-size: 1.1rem;
+        font-family: sans-serif;
+      }
+      .logo-title {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .logo {
+        width: 70px;
+        height: 70px;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="navbar">
+        <div class="logo-title">
+          <img
+            src="{{ url_for('static', filename='image.png') }}"
+            alt="logo"
+            class="logo"
+          />
+          <h1><a href="/">DialectAI</a></h1>
+        </div>
+        <nav>
+          <a href="/login">Login</a>
+          <a href="/register">Register</a>
+        </nav>
+      </div>
+    </header>
+  </body>
+</html>

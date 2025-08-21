@@ -1,0 +1,134 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>DialectAI - Translator</title>
+    <link rel="stylesheet" href="/static/index.css" />
+    <script>
+      let selectedVoice = null;
+
+      function loadVoices() {
+        const voices = speechSynthesis.getVoices();
+
+        // Try to find Indian English female voices
+        selectedVoice = voices.find(
+          (voice) =>
+            (voice.lang === "en-IN" || voice.lang.startsWith("en-IN")) &&
+            voice.name.toLowerCase().includes("female")
+        );
+
+        // If no Indian female voice found, fallback to any Indian voice
+        if (!selectedVoice) {
+          selectedVoice = voices.find(
+            (voice) => voice.lang === "en-IN" || voice.lang.startsWith("en-IN")
+          );
+        }
+
+        // Fallback to first voice available if none matches
+        if (!selectedVoice) {
+          selectedVoice = voices[0];
+        }
+      }
+
+      // Ensure voices are loaded (especially in Chrome)
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+
+      function speakText(text) {
+        if (!selectedVoice) loadVoices(); // Fallback in case voices aren't loaded yet
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.voice = selectedVoice;
+        speechSynthesis.speak(msg);
+      }
+
+      function copyText(text) {
+        navigator.clipboard.writeText(text).then(() => {
+          alert("Copied to clipboard!");
+        });
+      }
+    </script>
+
+    <style>
+      .top-right {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+      }
+
+      .history-button,
+      .eng-telugu-button {
+        padding: 8px 16px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .history-button:hover,
+      .eng-telugu-button:hover {
+        background-color: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div class="container">
+      <h2 style="color:blue; text-decoration: underline;">DialectAI</h2>
+      {% if username %}
+      <h3>Hi, {{ username }}👋</h3>
+      {% endif %}
+
+      <!-- <a href="{{ url_for('history') }}">View Translation History</a> -->
+      <div class="top-right">
+        <a href="{{ url_for('history') }}" class="history-button"
+          >View History</a
+        >
+        <a href="{{ url_for('eng_to_telugu') }}" class="eng-telugu-button"
+          >English ➜ Telugu</a
+        >
+      </div>
+
+      <form action="{{ url_for('translate') }}" method="POST">
+        <input
+          type="text"
+          name="text_input"
+          placeholder="Enter the Dialect Telugu text here"
+          required
+        />
+        <button type="submit">Translate</button>
+      </form>
+
+      <form method="POST" action="/voice_input">
+        <button type="submit">Use Voice Input 🎤</button>
+      </form>
+
+      {% if standard_telugu %}
+      <p>
+        <strong>Input:</strong> {{ standard_telugu }}
+        <!-- <span class="icon" onclick="speakText('{{ standard_telugu }}')">🔊</span>
+        <span class="icon" onclick="copyText('{{ standard_telugu }}')">📋</span> -->
+      </p>
+      {% endif %} {% if english_translation %}
+      <p>
+        <strong>English Translation:</strong> {{ english_translation }}
+        <br />
+        <span class="icon" onclick="speakText('{{ english_translation }}')" style="cursor: pointer;"
+          >🔊</span
+        >
+        <span class="icon" onclick="copyText('{{ english_translation }}')" style="cursor: pointer;"
+          >📋</span
+        >
+      </p>
+      <!-- {% endif %} {% if detected_dialect %}
+      <p><strong>Detected Dialect:</strong> {{ detected_dialect }}</p>
+      {% endif %} -->
+
+      <a href="/logout">Logout</a>
+    </div>
+  </body>
+</html>

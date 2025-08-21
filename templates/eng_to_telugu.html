@@ -1,0 +1,114 @@
+<!-- templates/eng_to_telugu.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>English ➜ Telugu Translator</title>
+    <link rel="stylesheet" href="/static/index.css" />
+    <script>
+      let selectedVoice = null;
+
+      function loadVoices() {
+        const voices = speechSynthesis.getVoices();
+
+        // Try to find Indian English female voices
+        selectedVoice = voices.find(
+          (voice) =>
+            (voice.lang === "en-IN" || voice.lang.startsWith("en-IN")) &&
+            voice.name.toLowerCase().includes("female")
+        );
+
+        // If no Indian female voice found, fallback to any Indian voice
+        if (!selectedVoice) {
+          selectedVoice = voices.find(
+            (voice) => voice.lang === "en-IN" || voice.lang.startsWith("en-IN")
+          );
+        }
+
+        // Fallback to first voice available if none matches
+        if (!selectedVoice) {
+          selectedVoice = voices[0];
+        }
+      }
+
+      // Ensure voices are loaded (especially in Chrome)
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+
+      function speakText(text) {
+        if (!selectedVoice) loadVoices(); // Fallback in case voices aren't loaded yet
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.voice = selectedVoice;
+        speechSynthesis.speak(msg);
+      }
+
+      function copyText(text) {
+        navigator.clipboard.writeText(text).then(() => {
+          alert("Copied to clipboard!");
+        });
+      }
+    </script>
+    <style>
+      .container {
+        padding: 40px;
+        max-width: 600px;
+        margin: auto;
+      }
+
+      .back-button {
+        padding: 8px 16px;
+        background-color: #2196f3;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-bottom: 20px;
+        display: inline-block;
+      }
+
+      .back-button:hover {
+        background-color: #0b7dda;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="container">
+      <a
+        href="{{ url_for('index') }}"
+        class="back-button"
+        style="text-decoration: none"
+        >⬅ Back to Dialect Translator</a
+      >
+      <h2>English ➜ Telugu Translator</h2>
+
+      <form method="POST" action="{{ url_for('eng_to_telugu') }}">
+        <input
+          type="text"
+          name="eng_input"
+          placeholder="Enter English text here"
+          required
+        />
+        <button type="submit">Translate</button>
+      </form>
+
+      {% if telugu_output %}
+  <div style="margin-top: 20px">
+    <p><strong>Input:</strong> {{ english_text }}</p>
+    <p><strong>Telugu Translation:</strong> {{ telugu_output }}</p>
+    <p>
+        <!-- <strong>English Translation:</strong> {{ english_translation }} -->
+        <!-- <br /> -->
+        <span class="icon" onclick="speakText('{{ english_translation }}')" style="cursor: pointer;"
+          >🔊</span
+        >
+        <span class="icon" onclick="copyText('{{ english_translation }}')" style="cursor: pointer;"
+          >📋</span
+        >
+      </p>
+  </div>
+  
+{% endif %}
+
+    </div>
+  </body>
+</html>

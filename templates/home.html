@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DialectAI - Home</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='home.css') }}"
+    />
+  </head>
+  <body>
+    <!-- <header style="box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);">
+      <div class="navbar" >
+        <h1><a href="/">DialectAI</a></h1>
+        <nav>
+          <a href="/login">Login</a>
+          <a href="/register">Register</a>
+        </nav>
+      </div>
+    </header> -->
+    {% include 'navbar.html' %}
+
+
+    <div class="container">
+      <div class="left-section">
+        <img
+          src="{{ url_for('static', filename='home_img.jpg') }}"
+          style="padding: 0px"
+          alt="DFD"
+        />
+      </div>
+      <div class="right-section">
+        <div class="title"><b>DialectAI</b></div>
+        <div class="tagline">Bridging Telugu Dialects to Global Understanding.</div>
+      </div>
+    </div>
+
+    <main>
+      <section class="intro">
+        <h2>What is DialectAI?</h2>
+        <p>
+          DialectAI is a powerful AI-based translation tool designed to
+          recognize and translate regional Telugu dialects like Chittoor and East
+          Godavari into English. It uses advanced speech-to-text,
+          dialect mapping, and machine translation to ensure accurate,
+          contextual translation from dialect to Standard Telugu and then to
+          English.
+        </p>
+      </section>
+
+      <section class="features">
+        <h2>Features</h2>
+        <ul>
+          <li>🎤 Voice input support</li>
+          <li>📝 Text-based input</li>
+          <li>📜 Displays detected dialect</li>
+          <li>🔤 Converts dialect Telugu → Standard Telugu → English</li>
+          <li>🔊 Listen and Copy your translation</li>
+          <li>📋 View the Translation history</li>
+        </ul>
+      </section>
+
+      <section class="get-started">
+        <h2>Get Started</h2>
+        <p>Click below to explore the translator interface!</p>
+        <a class="button" href="/login">Start Translating</a>
+      </section>
+      <img
+        src="{{ url_for('static', filename='DFD.jpg') }}"
+        alt="DFD"
+        style="
+          width: 100%;
+          height: 75%;
+          text-align: center;
+          align-items: center;
+          border-radius: 12px;
+          margin: 0px;
+          padding-bottom: 20px;
+        "
+      />
+    </main>
+
+    <footer>
+      <p>&copy; 2025 DialectAI | Created by 22MP28</p>
+    </footer>
+  </body>
+</html>

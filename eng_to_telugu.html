@@ -1,0 +1,58 @@
+<!-- templates/eng_to_telugu.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>English ➜ Telugu Translator</title>
+    <link rel="stylesheet" href="/static/index.css" />
+    <style>
+      .container {
+        padding: 40px;
+        max-width: 600px;
+        margin: auto;
+      }
+
+      .back-button {
+        padding: 8px 16px;
+        background-color: #2196F3;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-bottom: 20px;
+        display: inline-block;
+      }
+
+      .back-button:hover {
+        background-color: #0b7dda;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a href="{{ url_for('index') }}" class="back-button" style="text-decoration: None;">⬅ Back to Dialect Translator</a>
+      <h2>English ➜ Telugu Translator</h2>
+
+      <form method="POST" action="{{ url_for('eng_to_telugu') }}">
+  <textarea
+    name="eng_input"
+    placeholder="Enter English text here"
+    rows="4"
+    cols="50"
+    required
+  ></textarea>
+  <br /><br />
+  <button type="submit">Translate</button>
+</form>
+
+{% if telugu_output %}
+<p style="margin-top: 20px;"><strong>Telugu Translation:</strong> {{ telugu_output }}</p>
+{% endif %}
+
+
+      {% if telugu_output %}
+      <p><strong>Telugu Translation:</strong> {{ telugu_output }}</p>
+      {% endif %}
+    </div>
+  </body>
+</html>
